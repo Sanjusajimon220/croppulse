@@ -23,7 +23,7 @@ The centerpiece is the **Sentinel-1 → Sentinel-2 fusion**: radar sees through 
 ## Results
 
 - **Radar → NDVI gap-fill:** 5-fold cross-validated **R² = 0.65** across 7 crops (gradient boosting with temporal lag/rolling features; RF baseline 0.57). Per-crop R² ranges from **0.81 (maize)** and 0.78 (sugar beet) down to **0.38 (winter barley)** — radar predicts greenness best for tall, structurally dynamic crops and worst for cereals and grassland, consistent with the SAR literature.
-- **Crop classification:** **0.98** 5-fold CV accuracy over 7 crops (210 fields). The few errors are confined to phenologically overlapping crops (maize / sugar beet / potatoes among the summer row crops; barley / rape among the winter crops) — i.e. the model errs only where a human agronomist would. Winter wheat and winter barley are separated cleanly because barley is harvested earlier.
+- **Crop classification:** **0.97 spatially-blocked 5-fold CV accuracy** over 7 crops (210 fields) — essentially unchanged from the **0.98** random 5-fold split. The small **1.4-point gap** is the important number: it shows the classifier generalises to held-out geographic blocks rather than exploiting spatial autocorrelation between neighbouring fields. The few errors are confined to phenologically overlapping crops (winter rape ↔ winter wheat; maize / sugar beet / potatoes among the summer row crops) — i.e. the model errs only where a human agronomist would. Winter wheat and winter barley are separated cleanly because barley is harvested earlier.
 - **Phenology:** recovers seven distinct, agronomically correct crop calendars — including the correct ordering of winter barley being harvested before winter wheat.
 - **Drought monitor:** independently re-detects the two well-documented severe German droughts (**2018** and **2022**) as years that are both rainfall-deficient and NDVI-depressed, while correctly leaving wetter years (2021, 2023) unflagged.
 - **Yield proxy:** season-integrated NDVI ranks crops sensibly (grassland highest — green most of the year; potatoes lowest — shortest season). Quantitative validation against official district yield statistics is in progress.
@@ -63,7 +63,7 @@ The pipeline runs in **Google Earth Engine** (Python API) via Google Colab:
 
 - **LAI** is currently an empirical NDVI-based proxy, not a rigorous biophysical retrieval (SNAP Biophysical Processor / a trained S2→LAI model is the next step).
 - Results are for a **single AOI and a single year (2021)** — robustness across regions/years is not yet established.
-- Classification uses a **random** train/test split; spatial autocorrelation between nearby fields means a spatially-blocked cross-validation would be more conservative and is the rigorous next step.
+- Classification is validated with **both** random and spatially-blocked 5-fold CV (**0.98 / 0.97**); the small gap indicates limited spatial leakage. Note the blocks are still **within a single region** (Hildesheim Börde), so this demonstrates within-region robustness — cross-region and cross-year generalisation remain untested.
 - The yield indicator is **relative** (NDVI-days) and not yet calibrated/validated against official yield statistics.
 
 ## Author
